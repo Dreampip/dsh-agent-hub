@@ -103,7 +103,7 @@ window.FIXTURE = (() => {
   const mcpExtra = { workbuddy: { label: 'Connectors', path: '~/.workbuddy/connectors/default/mcp.json', total: 102, enabledCount: 0, items: connectors } }
 
   const state = {
-    version: '0.1.0',
+    version: '0.2.0',
     hub: { skillsDir: '~/.agents/skills', mcpPath: '~/.agents/mcp.json' },
     agents, candidates, dialects,
     authNotes: {
@@ -114,10 +114,9 @@ window.FIXTURE = (() => {
       'codebuddy:bearer': 'headers.Authorization', 'cursor:oauth': 'Cursor 设置里登录',
     },
     recognize: { '~/.codebuddy': '识别为 CodeBuddy（内置预设，已在上方列表）：MCP 文件 ~/.codebuddy/mcp.json（JSON · mcpServers · Claude 风格，9 个 Server）；技能目录 ~/.codebuddy/skills（不存在，同步时创建）。点「添加目录」等同于打开它的开关。' },
-    counts: { skills: 0, mcp: 5, updates: 0, pending: 5 },
+    counts: { skills: 0, mcp: 5, pending: 5 },
     skills: { hub: skillsHub, agents: skillsAgents },
     mcp: { hub: mcpHub, agents: mcpAgents, extra: mcpExtra },
-    repos: [{ repo: 'tt-a1i/archify', branch: 'main', commit: 'e9ef092', skills: [{ name: 'archify', description: 'Create validated architecture, workflow, sequence … diagrams', state: 'installed' }] }],
     records: [],
     trash: [],
   }
@@ -159,7 +158,7 @@ window.FIXTURE = (() => {
   }
   if (new URLSearchParams(location.search).get('fresh')) {
     state.mcp = { hub: [], agents: Object.fromEntries(Object.entries(mcpAgents).map(([k, v]) => [k, v.map((x) => ({ ...x, kind: x.kind === 'excluded' ? 'excluded' : 'own', state: null }))])), extra: mcpExtra }
-    state.counts = { skills: 0, mcp: 0, updates: 0, pending: 0 }
+    state.counts = { skills: 0, mcp: 0, pending: 0 }
     state.hub.mcpExists = false
   }
   return { routes }

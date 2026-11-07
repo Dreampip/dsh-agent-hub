@@ -3,11 +3,12 @@
 DeepSeek Harness（DSH）插件：以 `~/.agents` 为唯一真源，统一管理并同步各 Agent 的**技能**与 **MCP**。
 
 - 左侧栏常驻「Agent Hub」入口，主面板布局参考 dsh-skills-manager（按来源分组）
-- 技能：Codex / DSH 原生读取 `~/.agents/skills`；Claude Code、tclaude 等按「软链（默认）/ 复制」同步
+- 技能：Codex / DSH 原生读取 `~/.agents/skills`；Claude Code、tclaude 等按「软链（默认）/ 复制」同步；创建、导入、回收站
 - MCP：`~/.agents/mcp.json` 统一管理，适配 Codex TOML（区间替换、保留注释）、DSH `cordis.patch.yml`（托管块）、Claude/tclaude/Cursor/OpenCode/Gemini 等 JSON 方言
 - 鉴权：每个 Server 设首选方式（OAuth / 请求头 / 环境变量），按各 Agent 能力自动降级；密钥存 `~/.agents/secrets.json`（600），同步时解析
 - 对比：三方对比（基线 / Hub / 目标），逐字段选择；60 s ≡ 60000 ms 等规范化
 - 只手动同步：生成计划 → 勾选 → 执行；写入前自动备份，可一键回滚
+- 界面：所有分组默认折叠（折叠状态会记住），组头显示状态汇总；状态说明收进「?」浮层；未启用的 Agent 只在「来源目录」中出现
 - 来源目录：自动检测本机 Agent（Codex、DSH、Claude Code、tclaude、WorkBuddy、CodeBuddy、Cursor、Claude Desktop、OpenCode、Gemini、Windsurf），开关纳入；也可「添加目录」自动识别
 - WorkBuddy 等可设为「仅管理」：只查看、启停、复制到 Hub，Hub 永不写入
 
@@ -29,7 +30,6 @@ DeepSeek Harness（DSH）插件：以 `~/.agents` 为唯一真源，统一管理
   skills/            技能真源
   mcp.json           MCP 真源（只含 ${secret:名称} 引用）
   secrets.json       密钥（600）
-  .skill-lock.json   技能来源记录（与 skills CLI 兼容）
   hub/state.json     基线、同步记录、回收站
   hub/sources.json   来源目录设置
   hub/backups/       每次写入前的备份

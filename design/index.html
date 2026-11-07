@@ -36,6 +36,7 @@
 <script>
   const qs = new URLSearchParams(location.search)
   if (qs.get('theme') === 'dark') document.body.setAttribute('data-ds-dark-theme', '')
+  window.__AH_OPEN__ = (qs.get('open') || '').split(',').filter(Boolean)
   // 拦截插件请求，用 fixtures 回答
   const realFetch = window.fetch
   window.fetch = async (input, init) => {
@@ -56,6 +57,7 @@
   const h = React.createElement
   ReactDOM.createRoot(document.getElementById('hub-icon')).render(h(mod.SidebarIcon, { size: 16, active: true }))
   const modal = qs.get('modal') ? JSON.parse(qs.get('modal')) : null
+  if (qs.get('legend')) { const st = FIXTURE.routes['/state']; FIXTURE.routes['/state'] = () => ({ ...st(), __legendOpen: true }) }
   ReactDOM.createRoot(document.getElementById('root')).render(h(mod.App, { initial: { tab: qs.get('tab') || 'skills', modal } }))
 </script>
 </body>
