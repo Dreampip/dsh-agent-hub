@@ -17,9 +17,12 @@ shot 4-server-auth 1060 "tab=mcp&modal=$(enc '{"type":"server","name":"tapd"}')"
 shot 5-skill-detail 900 "tab=skills&modal=$(enc '{"type":"skill","name":"kier-adp-work-knowledge-loop"}')"
 shot 6-diff 900 "tab=mcp&modal=$(enc '{"type":"diff","kind":"mcp","name":"kier-adp-kb","agent":"codex"}')"
 shot 7-plan 900 "tab=mcp&modal=$(enc '{"type":"plan"}')"
-shot 8-import 900 "tab=mcp&modal=$(enc '{"type":"import"}')"
+shot 8-import 900 "tab=mcp&fresh=1&modal=$(enc '{"type":"import"}')"
 shot 10-skills-dark 1500 'tab=skills&theme=dark'
 shot 11-mcp-first-run 1100 'tab=mcp&fresh=1'
 shot 12-skills-expanded 900 'tab=skills&open=skills:hub,skills:tclaude'
 shot 13-legend 900 'tab=skills&legend=1'
 shot 14-mcp-expanded 1100 'tab=mcp&open=mcp:hub,mcp:codex'
+shot 15-how 1000 "tab=mcp&modal=$(enc '{"type":"how"}')"
+shot 16-settings 900 "tab=mcp&modal=$(enc '{"type":"settings"}')"
+shot 17-readonly 900 'tab=mcp&readonly=1&open=mcp:hub'

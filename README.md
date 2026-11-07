@@ -3,14 +3,17 @@
 DeepSeek Harness（DSH）插件：以 `~/.agents` 为唯一真源，统一管理并同步各 Agent 的**技能**与 **MCP**。
 
 - 左侧栏常驻「Agent Hub」入口，主面板布局参考 dsh-skills-manager（按来源分组）
-- 技能：Codex / DSH 原生读取 `~/.agents/skills`；Claude Code、tclaude 等按「软链（默认）/ 复制」同步；创建、导入、回收站
-- MCP：`~/.agents/mcp.json` 统一管理，适配 Codex TOML（区间替换、保留注释）、DSH `cordis.patch.yml`（托管块）、Claude/tclaude/Cursor/OpenCode/Gemini 等 JSON 方言
+- 技能：Codex / DSH 原生读取 `~/.agents/skills`；Claude Code、TClaude 等按「软链（默认）/ 复制」同步；创建、导入、回收站
+- MCP：`~/.agents/mcp.json` 统一管理，适配 Codex TOML（区间替换、保留注释）、DSH `cordis.patch.yml`（托管块）、Claude/TClaude/Cursor/OpenCode/Gemini 等 JSON 方言；「同步机制」弹窗可实时看到任一 Server 在各 Agent 中的写法
 - 鉴权：每个 Server 设首选方式（OAuth / 请求头 / 环境变量），按各 Agent 能力自动降级；密钥存 `~/.agents/secrets.json`（600），同步时解析
 - 对比：三方对比（基线 / Hub / 目标），逐字段选择；60 s ≡ 60000 ms 等规范化
 - 只手动同步：生成计划 → 勾选 → 执行；写入前自动备份，可一键回滚
 - 界面：所有分组默认折叠（折叠状态会记住），组头显示状态汇总；状态说明收进「?」浮层；未启用的 Agent 只在「来源目录」中出现
-- 来源目录：自动检测本机 Agent（Codex、DSH、Claude Code、tclaude、WorkBuddy、CodeBuddy、Cursor、Claude Desktop、OpenCode、Gemini、Windsurf），开关纳入；也可「添加目录」自动识别
-- WorkBuddy 等可设为「仅管理」：只查看、启停、复制到 Hub，Hub 永不写入
+- 通用、不绑定个人环境：只显示本机检测到的 Agent；检测到即启用（可在设置中改为手动）
+- 每个 Agent 两个独立开关：同步技能 / 同步 MCP。关闭后该类内容只读对照，Hub 不写入
+- 已验证的预设：Codex、DSH、Claude Code、TClaude（默认同步）；其余预设（WorkBuddy、CodeBuddy、Cursor、Claude Desktop、OpenCode、Gemini、Windsurf）标为「未验证」，默认不同步，验证后可自行打开
+- 「添加目录」可接入任意 Agent：自动识别技能目录与 MCP 文件格式
+- 只读模式：只查看和对比，禁用同步、回写、导入、回滚等所有写入
 
 ## 安全边界（不可配置）
 
@@ -31,7 +34,8 @@ DeepSeek Harness（DSH）插件：以 `~/.agents` 为唯一真源，统一管理
   mcp.json           MCP 真源（只含 ${secret:名称} 引用）
   secrets.json       密钥（600）
   hub/state.json     基线、同步记录、回收站
-  hub/sources.json   来源目录设置
+  hub/sources.json   来源目录设置（启用、路径、同步开关）
+  hub/settings.json  全局设置（默认同步方式、自动启用、只读）
   hub/backups/       每次写入前的备份
 ```
 

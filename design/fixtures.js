@@ -8,20 +8,20 @@ window.FIXTURE = (() => {
       skills: { dir: '~/.dsh/skills', mode: 'native' }, mcp: { format: 'dsh-patch', path: '~/.dsh/profiles/desktop/cordis.patch.yml' } },
     { id: 'claude', name: 'Claude Code', short: 'C', color: '#c96442', role: 'sync', preset: true, auth: ['oauth', 'bearer', 'env'],
       skills: { dir: '~/.claude/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.claude.json', key: 'mcpServers', dialect: 'claude' } },
-    { id: 'tclaude', name: 'tclaude', short: 'T', color: '#d97757', role: 'sync', preset: true, auth: ['oauth', 'bearer', 'env'],
+    { id: 'tclaude', name: 'TClaude', short: 'T', color: '#d97757', role: 'sync', preset: true, auth: ['oauth', 'bearer', 'env'],
       skills: { dir: '~/.tclaude/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.tclaude/.claude.json', key: 'mcpServers', dialect: 'claude' } },
-    { id: 'workbuddy', name: 'WorkBuddy', short: 'W', color: '#7c3aed', role: 'manage', preset: true, auth: ['oauth', 'bearer'],
-      skills: { dir: '~/.workbuddy/skills', mode: 'none' }, mcp: { format: 'json', path: '~/.workbuddy/mcp.json', key: 'mcpServers', dialect: 'workbuddy' } },
+    { id: 'workbuddy', verified: false, name: 'WorkBuddy', short: 'W', color: '#7c3aed', role: 'sync', sync: { skills: false, mcp: false }, preset: true, auth: ['oauth', 'bearer'],
+      skills: { dir: '~/.workbuddy/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.workbuddy/mcp.json', key: 'mcpServers', dialect: 'workbuddy' } },
   ]
   // 自动检测到但未启用（真实存在于本机）
   agents.push(
-    { id: 'codebuddy', name: 'CodeBuddy', short: 'CB', color: '#0052d9', role: 'sync', enabled: false, auth: ['oauth', 'bearer'],
+    { id: 'codebuddy', verified: false, sync: { skills: false, mcp: false }, name: 'CodeBuddy', short: 'CB', color: '#0052d9', role: 'sync', auth: ['oauth', 'bearer'],
       skills: { dir: '~/.codebuddy/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.codebuddy/mcp.json', key: 'mcpServers', dialect: 'claude' } },
-    { id: 'cursor', name: 'Cursor', short: 'Cu', color: '#1f2328', role: 'sync', enabled: false, auth: ['oauth', 'bearer', 'env'],
+    { id: 'cursor', verified: false, sync: { skills: false, mcp: false }, name: 'Cursor', short: 'Cu', color: '#1f2328', role: 'sync', auth: ['oauth', 'bearer', 'env'],
       skills: { dir: '~/.cursor/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.cursor/mcp.json', key: 'mcpServers', dialect: 'cursor' } },
-    { id: 'claude-desktop', name: 'Claude Desktop', short: 'CD', color: '#b4793f', role: 'sync', enabled: false, auth: ['none'],
+    { id: 'claude-desktop', verified: false, sync: { skills: false, mcp: false }, name: 'Claude Desktop', short: 'CD', color: '#b4793f', role: 'sync', auth: ['none'],
       skills: { mode: 'none' }, mcp: { format: 'json', path: '~/Library/Application Support/Claude/claude_desktop_config.json', key: 'mcpServers', dialect: 'claude-desktop' } },
-    { id: 'opencode', name: 'OpenCode', short: 'O', color: '#525866', role: 'sync', enabled: false, auth: ['oauth', 'bearer', 'env'],
+    { id: 'opencode', verified: false, sync: { skills: false, mcp: false }, name: 'OpenCode', short: 'O', color: '#525866', role: 'sync', auth: ['oauth', 'bearer', 'env'],
       skills: { dir: '~/.config/opencode/skills', mode: 'link' }, mcp: { format: 'json', path: '~/.config/opencode/opencode.json', key: 'mcp', dialect: 'opencode' } },
   )
   const candidates = []
@@ -103,14 +103,14 @@ window.FIXTURE = (() => {
   const mcpExtra = { workbuddy: { label: 'Connectors', path: '~/.workbuddy/connectors/default/mcp.json', total: 102, enabledCount: 0, items: connectors } }
 
   const state = {
-    version: '0.2.0',
+    version: '0.3.0',
     hub: { skillsDir: '~/.agents/skills', mcpPath: '~/.agents/mcp.json' },
     agents, candidates, dialects,
     authNotes: {
       'codex:oauth': '首次使用时 Codex 弹出登录', 'codex:bearer': 'http_headers = { Authorization = … }',
       'dsh:bearer': 'DSH mcp-client 只支持静态请求头，写入明文 Bearer',
       'claude:oauth': '/mcp 里登录，令牌由 Claude 自己保存', 'claude:bearer': 'headers.Authorization',
-      'tclaude:oauth': '/mcp 里登录，令牌由 tclaude 自己保存', 'tclaude:bearer': 'headers.Authorization',
+      'tclaude:oauth': '/mcp 里登录，令牌由 TClaude 自己保存', 'tclaude:bearer': 'headers.Authorization',
       'codebuddy:bearer': 'headers.Authorization', 'cursor:oauth': 'Cursor 设置里登录',
     },
     recognize: { '~/.codebuddy': '识别为 CodeBuddy（内置预设，已在上方列表）：MCP 文件 ~/.codebuddy/mcp.json（JSON · mcpServers · Claude 风格，9 个 Server）；技能目录 ~/.codebuddy/skills（不存在，同步时创建）。点「添加目录」等同于打开它的开关。' },
@@ -119,6 +119,7 @@ window.FIXTURE = (() => {
     mcp: { hub: mcpHub, agents: mcpAgents, extra: mcpExtra },
     records: [],
     trash: [],
+    settings: { root: '~/.agents', defaultMode: 'link', readOnly: false, autoEnable: true },
   }
 
   const routes = {
@@ -144,19 +145,33 @@ window.FIXTURE = (() => {
         { id: 4, agent: 'workbuddy', target: '~/.workbuddy/…', actions: ['skip'], object: '仅管理，不同步' },
       ],
     }),
-    '/mcp/import-preview': () => ({
-      servers: [
-        { name: 'tapd', endpoint: 'mcpgw.knot.woa.com/tapd/', found: ['dsh', 'codex', 'claude', 'tclaude'], suggest: 'dsh', diff: 'DSH 带 Authorization 头；Codex / Claude / tclaude 无头（OAuth 登录）→ 导入后按 Agent 记为 OAuth' },
-        { name: 'iwiki', endpoint: 'prod.mcp.it.woa.com/app_iwiki_mcp/mcp3', found: ['dsh', 'codex', 'claude', 'tclaude'], suggest: 'dsh', diff: '同上' },
-        { name: 'gongfeng', endpoint: 'mcpgw.knot.woa.com/gongfeng', found: ['dsh', 'codex', 'claude', 'tclaude'], suggest: 'dsh', diff: '同上' },
-        { name: 'kier-adp-kb', endpoint: '127.0.0.1:27123/mcp/', found: ['dsh', 'codex', 'claude', 'tclaude'], suggest: 'claude', diff: '' },
-        { name: 'url_fetch', endpoint: 'uvx mcp-server-fetch', found: ['claude', 'tclaude'], suggest: 'claude', diff: '' },
-        { name: 'codegraph', endpoint: 'codegraph serve --mcp', found: ['claude', 'tclaude'], suggest: 'claude', diff: '' },
-        { name: 'node_repl', endpoint: 'ChatGPT.app/…/node_repl', found: ['codex'], suggest: 'skip', diff: 'Codex 内置', excluded: true },
+    '/mcp/import-preview': () => {
+      const oa = { auth: 'oauth' }; const kb = { auth: 'bearer', fp: '#c56a06' }; const cmd = { auth: 'none' }
+      const tri = (fp) => ({ codex: oa, dsh: { auth: 'bearer', fp }, claude: oa, tclaude: oa })
+      const res = '首选 OAuth；DSH 记为请求头（密钥取自 DSH）'
+      return { servers: [
+        { name: 'tapd', endpoint: 'mcpgw.knot.woa.com/tapd/', defs: tri('#9c264d'), sameDefinition: true, suggest: 'dsh', result: res },
+        { name: 'iwiki', endpoint: 'prod.mcp.it.woa.com/app_iwiki_mcp/mcp3', defs: tri('#081dc6'), sameDefinition: true, suggest: 'dsh', result: res },
+        { name: 'gongfeng', endpoint: 'mcpgw.knot.woa.com/gongfeng', defs: tri('#081dc6'), sameDefinition: true, suggest: 'dsh', result: res },
+        { name: 'kier-adp-kb', endpoint: '127.0.0.1:27123/mcp/', defs: { codex: kb, dsh: kb, claude: kb, tclaude: kb }, sameDefinition: true, suggest: 'codex', result: '首选请求头（4 个 Agent 密钥相同）' },
+        { name: 'url_fetch', endpoint: 'uvx mcp-server-fetch', defs: { claude: cmd, tclaude: cmd }, sameDefinition: true, suggest: 'claude', result: '本地命令' },
+        { name: 'codegraph', endpoint: 'codegraph serve --mcp', defs: { claude: cmd, tclaude: cmd }, sameDefinition: true, suggest: 'claude', result: '本地命令' },
+        { name: 'node_repl', endpoint: '/Applications/ChatGPT.app/…/node_repl', defs: { codex: cmd }, excluded: true, note: 'Codex 内置，永不托管' },
+      ] }
+    },
+    '/mcp/explain': () => ({
+      hub: ['"tapd": {', '  "transport": "http",', '  "url": "https://mcpgw.knot.woa.com/tapd/",', '  "timeoutMs": 60000,', '  "auth": {', '    "prefer": "oauth",', '    "secret": "tapd",', '    "uses": { "dsh": "bearer" }', '  }', '}'],
+      targets: [
+        { agent: 'codex', file: '~/.codex/config.toml', auth: 'oauth', lines: ['[mcp_servers.tapd]', 'url = "https://mcpgw.knot.woa.com/tapd/"', 'tool_timeout_sec = 60'], note: '不写请求头，首次使用时 Codex 弹出 OAuth 登录' },
+        { agent: 'dsh', file: '~/.dsh/…/cordis.patch.yml', auth: 'bearer', lines: ['- id: agent-hub-mcp-tapd', "  name: '@deepseek-ai/dsh-mcp-client'", '  config:', '    serverName: tapd', '    transport: streamable-http', '    url: https://mcpgw.knot.woa.com/tapd/', '    toolCallTimeoutMs: 60000', '    headers:', '      Authorization: Bearer ••••#9c264d'], note: 'DSH 不支持 OAuth → 自动退为请求头，密钥从 secrets.json 解析' },
+        { agent: 'claude', file: '~/.claude.json', auth: 'oauth', lines: ['"tapd": {', '  "type": "http",', '  "url": "https://mcpgw.knot.woa.com/tapd/"', '}'], note: '在 /mcp 里登录' },
+        { agent: 'tclaude', file: '~/.tclaude/.claude.json', auth: 'oauth', lines: ['"tapd": {', '  "type": "http",', '  "url": "https://mcpgw.knot.woa.com/tapd/"', '}'], note: '同 Claude Code 格式' },
       ],
     }),
   }
-  if (new URLSearchParams(location.search).get('fresh')) {
+  const qs0 = new URLSearchParams(location.search)
+  if (qs0.get('readonly')) state.settings.readOnly = true
+  if (qs0.get('fresh')) {
     state.mcp = { hub: [], agents: Object.fromEntries(Object.entries(mcpAgents).map(([k, v]) => [k, v.map((x) => ({ ...x, kind: x.kind === 'excluded' ? 'excluded' : 'own', state: null }))])), extra: mcpExtra }
     state.counts = { skills: 0, mcp: 0, pending: 0 }
     state.hub.mcpExists = false
