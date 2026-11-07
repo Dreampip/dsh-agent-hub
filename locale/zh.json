@@ -1,0 +1,1 @@
+{ "meta": { "title": "Agent Hub", "description": "以 ~/.agents 为真源，统一管理并同步 Codex、DSH、Claude Code、tclaude 等 Agent 的技能与 MCP；三方对比、手动同步、自动备份可回滚。" } }

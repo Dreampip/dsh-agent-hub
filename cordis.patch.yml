@@ -1,0 +1,4 @@
+# dsh-agent-hub bundle patch：安装时由 DSH 自动挂载
+- insert:
+    - id: agent-hub
+      name: 'dsh-agent-hub'

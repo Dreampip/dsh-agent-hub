@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Agent Hub · 设计稿（渲染真实 lib/client.js）</title>
+<link rel="stylesheet" href="vendor/dsh-theme.css">
+<style>
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,"PingFang SC","Helvetica Neue",sans-serif;font-size:13px;display:flex;color:var(--dsw-alias-label-primary)}
+  /* 仅用于设计稿：模拟 DSH 左侧栏外框（真实插件只提供其中的「Agent Hub」图标与主面板） */
+  .shell-side{width:240px;flex:none;background:var(--dsw-specific-sidebar-fill,var(--dsw-alias-bg-layer-2));border-right:0.5px solid var(--dsw-alias-border-l2);padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+  .shell-brand{font-weight:650;font-size:14px;padding:4px 8px 14px;display:flex;gap:8px;align-items:center}
+  .shell-brand i{width:20px;height:20px;border-radius:6px;background:#4d6bfe;display:inline-block}
+  .shell-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;color:var(--dsw-alias-label-secondary)}
+  .shell-item.on{background:var(--dsw-specific-sidebar-nav-item-active,var(--dsw-alias-interactive-bg-active));color:var(--dsw-alias-label-primary);font-weight:600}
+  .shell-item span.g{width:16px;text-align:center;opacity:.7}
+  .shell-sec{font-size:11px;color:var(--dsw-alias-label-tertiary);margin:14px 8px 4px}
+  .shell-main{flex:1;min-width:0;height:100vh;background:var(--dsw-alias-bg-base)}
+</style>
+</head>
+<body>
+<aside class="shell-side">
+  <div class="shell-brand"><i></i>DeepSeek Harness</div>
+  <div class="shell-item"><span class="g">✎</span>新会话</div>
+  <div class="shell-item"><span class="g">⧉</span>插件</div>
+  <div class="shell-item"><span class="g">✦</span>技能</div>
+  <div class="shell-item on" id="hub-item"><span id="hub-icon"></span>Agent Hub</div>
+  <div class="shell-item"><span class="g">◷</span>定时任务</div>
+  <div class="shell-sec">default-workspace</div>
+  <div class="shell-item">再次帮我开发 dsh 插件</div>
+</aside>
+<main class="shell-main" id="root"></main>
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
+<script src="fixtures.js"></script>
+<script>
+  const qs = new URLSearchParams(location.search)
+  if (qs.get('theme') === 'dark') document.body.setAttribute('data-ds-dark-theme', '')
+  // 拦截插件请求，用 fixtures 回答
+  const realFetch = window.fetch
+  window.fetch = async (input, init) => {
+    const u = new URL(typeof input === 'string' ? input : input.url, location.href)
+    const i = u.pathname.indexOf('/api/dsh-agent-hub')
+    if (i < 0) return realFetch(input, init)
+    const p = u.pathname.slice(i + '/api/dsh-agent-hub'.length)
+    const fn = FIXTURE.routes[p]
+    const body = fn ? { ok: true, data: fn(init && init.body ? JSON.parse(init.body) : null) } : { ok: true, data: {} }
+    return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } })
+  }
+  // 与 DSH 相同的模块装载约定
+  let mod
+  window.__ModuleLoader__ = { load: ({ factory }) => { mod = factory((n) => n === 'react' ? React : n === 'react-dom' ? ReactDOM : undefined) } }
+</script>
+<script src="../lib/client.js"></script>
+<script>
+  const h = React.createElement
+  ReactDOM.createRoot(document.getElementById('hub-icon')).render(h(mod.SidebarIcon, { size: 16, active: true }))
+  const modal = qs.get('modal') ? JSON.parse(qs.get('modal')) : null
+  ReactDOM.createRoot(document.getElementById('root')).render(h(mod.App, { initial: { tab: qs.get('tab') || 'skills', modal } }))
+</script>
+</body>
+</html>

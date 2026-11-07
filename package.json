@@ -1,0 +1,27 @@
+{
+  "name": "dsh-agent-hub",
+  "version": "0.1.0",
+  "description": "Agent Hub：以 ~/.agents 为真源，统一管理并同步 Codex / DSH / Claude Code / tclaude 等 Agent 的技能与 MCP",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib", "locale", "icon.svg", "cordis.patch.yml", "README.md"],
+  "repository": { "type": "git", "url": "git+https://github.com/Dreampip/dsh-agent-hub.git" },
+  "keywords": ["dsh", "deepseek-harness", "dsh-plugin", "skills", "mcp", "codex", "claude"],
+  "engines": { "node": ">=20", "dsh": ">=0.2.0-rc.1 <0.3.0-0" },
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-ui-slots", "@deepseek-ai/dsh-client-locale"]
+    }
+  }
+}
